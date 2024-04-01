@@ -211,6 +211,24 @@ public class Scatter : ICategory
         }
     }
 
+    public class ScatterDateTimeSmooth : RecipeBase
+    {
+        public override string Name => "Scatter DateTime Smoothed";
+        public override string Description => "A scatter plot may use DateTime units but " +
+            "be sure to setup the respective axis to display using DateTime format. This plot is smoothed.";
+
+        [Test]
+        public override void Execute()
+        {
+            DateTime[] xs = Generate.DateTime.Days(100);
+            double[] ys = Generate.RandomWalk(xs.Length);
+
+            var sp = myPlot.Add.Scatter(xs, ys);
+            sp.Smooth = true;
+            myPlot.Axes.DateTimeTicksBottom();
+        }
+    }
+
     public class ScatterStep : RecipeBase
     {
         public override string Name => "Step Plot";

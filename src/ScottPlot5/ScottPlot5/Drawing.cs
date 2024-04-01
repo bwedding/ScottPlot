@@ -1,5 +1,6 @@
 ﻿using ScottPlot.Extensions;
 using System.Drawing;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace ScottPlot;
@@ -157,6 +158,58 @@ public static class Drawing
         };
 
         DrawLines(canvas, paint, pixels, ls);
+    }
+
+    private static SKPoint CalculateCubicBezierControlPoint(SKPoint p0, SKPoint p1, SKPoint p2, SKPoint p3, float tension)
+    {
+        var t = tension;
+        var c1 = new SKPoint(p1.X + (p2.X - p0.X) * t, p1.Y + (p2.Y - p0.Y) * t);
+        return c1;
+    }
+
+    public static void DrawSmoothLines(SKCanvas canvas, SKPaint paint, IEnumerable<Pixel> pixels, LineStyle lineStyle, double smoothTension)
+    {
+        if (lineStyle.Width == 0 || !lineStyle.IsVisible || pixels.Count() < 4)
+            return;
+
+        lineStyle.ApplyToPaint(paint);
+
+        using var path = new SKPath();
+        path.MoveTo(pixels.First().ToSKPoint());
+
+        var points = pixels.Select(p => p.ToSKPoint()).ToArray();
+
+        smoothTension = 0.1f;
+        for (int i = 1; i < points.Length - 6; i += 9)
+        {
+            // Calculate control points using smoothTension
+            //var controlPoint1 = CalculateCubicBezierControlPoint(points[i - 1], points[i], points[i + 1], points[i + 2], (float)smoothTension);
+            //var controlPoint2 = CalculateCubicBezierControlPoint(points[i], points[i + 1], points[i + 2], points[i + 3], (float)smoothTension);
+            var endPoint = points[i + 2];
+            path.CubicTo(points[i], points[i + 1], endPoint);
+            endPoint = points[i + 4];
+            path.CubicTo(points[i+2], points[i + 3], endPoint);
+            endPoint = points[i + 6];
+            path.CubicTo(points[i + 4], points[i + 5], endPoint);
+
+        }
+
+        // Handle the last segment
+        if (points.Length % 3 == 2)
+        {
+            // Draw a line to the second to last and last points if only two points remain
+            path.LineTo(points[points.Length - 2]); // second to last point
+            path.LineTo(points[points.Length - 1]); // last point
+        }
+        else if (points.Length % 3 == 1)
+        {
+            // Draw a cubic Bezier with the last three points if three points remain
+            int i = points.Length - 3;
+            path.CubicTo(points[i], points[i + 1], points[i + 2]);
+        }
+
+        // Render the path on the canvas
+        canvas.DrawPath(path, paint);
     }
 
     public static void DrawLines(SKCanvas canvas, SKPaint paint, IEnumerable<Pixel> pixels, LineStyle lineStyle)

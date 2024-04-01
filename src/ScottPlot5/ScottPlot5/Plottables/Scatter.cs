@@ -1,4 +1,7 @@
-﻿namespace ScottPlot.Plottables;
+﻿using SkiaSharp;
+using System.Xml.Schema;
+
+namespace ScottPlot.Plottables;
 
 public class Scatter(IScatterSource data) : IPlottable
 {
@@ -63,7 +66,15 @@ public class Scatter(IScatterSource data) : IPlottable
         };
 
         using SKPaint paint = new();
-        Drawing.DrawLines(rp.Canvas, paint, linePixels, LineStyle);
+        if (Smooth)
+        {
+            Drawing.DrawSmoothLines(rp.Canvas, paint, linePixels, LineStyle, SmoothTension);
+        }
+        else
+        {
+            Drawing.DrawLines(rp.Canvas, paint, linePixels, LineStyle);
+        }
+
         Drawing.DrawMarkers(rp.Canvas, paint, markerPixels, MarkerStyle);
     }
 
