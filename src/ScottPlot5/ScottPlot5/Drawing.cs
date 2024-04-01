@@ -179,18 +179,13 @@ public static class Drawing
 
         var points = pixels.Select(p => p.ToSKPoint()).ToArray();
 
-        smoothTension = 0.1f;
-        for (int i = 1; i < points.Length - 6; i += 9)
+        for (int i = 1; i < points.Length - 3; i += 3)
         {
-            // Calculate control points using smoothTension
-            //var controlPoint1 = CalculateCubicBezierControlPoint(points[i - 1], points[i], points[i + 1], points[i + 2], (float)smoothTension);
-            //var controlPoint2 = CalculateCubicBezierControlPoint(points[i], points[i + 1], points[i + 2], points[i + 3], (float)smoothTension);
+            // Calculate control points using smoothTension. Have to adjust the forloop stepsize and length when you use this
+            //var controlPoint1 = CalculateCubicBezierControlPoint(points[i - 1], points[i], points[i + 1], points[i + 2], 0.5f);
+            //var controlPoint2 = CalculateCubicBezierControlPoint(points[i], points[i + 1], points[i + 2], points[i + 3], 0.5f);  // Last value will be SmoothTension
             var endPoint = points[i + 2];
             path.CubicTo(points[i], points[i + 1], endPoint);
-            endPoint = points[i + 4];
-            path.CubicTo(points[i+2], points[i + 3], endPoint);
-            endPoint = points[i + 6];
-            path.CubicTo(points[i + 4], points[i + 5], endPoint);
 
         }
 
